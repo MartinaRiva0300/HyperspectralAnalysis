@@ -5,6 +5,8 @@ function HyperspectralAnalysis_Spectrum_rectangularROI
 
 % Versione 23/06/2023
 
+%Updates by Martina Riva
+
 % clear all;
 
 home;
