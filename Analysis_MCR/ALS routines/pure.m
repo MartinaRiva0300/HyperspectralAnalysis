@@ -9,7 +9,6 @@ function [sp,imp]=pure(d,nr,f)
 
 [nrow,ncol]=size(d);
 
-
 % calculation of the purity spectrum
 
 f=f/100;
