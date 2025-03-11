@@ -1,1 +1,67 @@
-This folder contains all scripts and MATLAB Apps created with AppDesigner to perform Principal Component Analysis on spectral hypercubes
+# Hyperspectral Analysis - PCA
+
+This repository contains tools and scripts for performing Principal Component Analysis (PCA) on hyperspectral data.
+
+## Getting Started
+
+### Prerequisites
+
+- MATLAB with App Designer
+- Hyperspectral data in an appropriate format (csv file) I am not sure (Antonio)
+
+### Instructions
+
+1. Run **PCA_imaging.mlapp** in App Designer to open the initial window.
+2. Press the button **Load** to upload the spectral hypercube.
+
+### Usage
+
+The application allows users to load hyperspectral data and perform PCA to reduce the dimensionality of the data for further analysis.
+
+### App Windows
+
+Below are some application windows labeled to guide you:
+
+![Screenshot 1](path/to/screenshot1.png)
+*Description of what is shown in the screenshot.*
+
+![Screenshot 2](path/to/screenshot2.png)
+*Description of what is shown in the screenshot.*
+
+![Screenshot 3](path/to/screenshot3.png)
+*Description of what is shown in the screenshot.*
+
+## Contributing
+
+If you wish to contribute to this project, please follow the standard procedures for forking the repository, making changes, and submitting a pull request.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Special thanks to everyone who contributed to the development of this tool.
+
+
+EXTRA:
+
+To use the MATLAB scripts provided in this repository, your hyperspectral data should be in the following format:
+
+1. **File Format**: The data should be stored in CSV format.
+2. **Data Structure**:
+    - Each row represents a different sample.
+    - Each column represents the intensity value at a specific wavelength.
+3. **Required Metadata**:
+    - Sample ID: A unique identifier for each sample.
+    - Acquisition Date: The date when the sample was acquired.
+4. **Example Data Entry**:
+    ```csv
+    SampleID, AcquisitionDate, Wavelength1, Wavelength2, ..., WavelengthN
+    S001, 2025-03-11, 0.123, 0.456, ..., 0.789
+    S002, 2025-03-12, 0.321, 0.654, ..., 0.987
+    ```
+5. **Preprocessing Steps**:
+    - Ensure all intensity values are normalized between 0 and 1.
+    - Remove any rows with missing or corrupted data.
+
