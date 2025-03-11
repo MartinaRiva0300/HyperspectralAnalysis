@@ -7,7 +7,7 @@ This repository contains tools and scripts for performing Principal Component An
 ### Prerequisites
 
 - MATLAB with App Designer
-- Hyperspectral data in an appropriate format
+- Hyperspectral data in an appropriate format (Check in the Supplementary)
 
 ### Instructions
 
@@ -20,22 +20,26 @@ The application allows users to load hyperspectral data and perform PCA to reduc
 
 ### Screenshots
 
-Below are some screenshots of the application to guide you:
+Below are some labeled windows of the application to guide you:
 
-![Screenshot 1](path/to/screenshot1.png)
-*Description of what is shown in the screenshot.*
+#### Window 1
+![Window1](https://github.com/MartinaRiva0300/HyperspectralAnalysis/blob/main/Analysis_PCA/supplementary_material_README/Window1.jpeg)
+*If you want to add a description.*
 
-![Screenshot 2](path/to/screenshot2.png)
-*Description of what is shown in the screenshot.*
+#### Window 2
+![Window2](https://github.com/MartinaRiva0300/HyperspectralAnalysis/blob/main/Analysis_PCA/supplementary_material_README/Window2.jpeg)
 
-![Screenshot 3](path/to/screenshot3.png)
-*Description of what is shown in the screenshot.*
+#### Window 2.1
+![Window 2.1](https://github.com/MartinaRiva0300/HyperspectralAnalysis/blob/main/Analysis_PCA/supplementary_material_README/Window%202.1.jpeg)
+
+#### Window 3
+![Window3](https://github.com/MartinaRiva0300/HyperspectralAnalysis/blob/main/Analysis_PCA/supplementary_material_README/Window%203.jpeg)
 
 ## Contributing
 
 If you wish to contribute to this project, please follow the standard procedures for forking the repository, making changes, and submitting a pull request.
 
-## License
+## License (TO FILL)
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
