@@ -7,7 +7,7 @@ This repository contains tools and scripts for performing Principal Component An
 ### Prerequisites
 
 - MATLAB with App Designer
-- Hyperspectral data in an appropriate format (csv file) I am not sure (Antonio)
+- Hyperspectral data in an appropriate format (csv file)
 
 ### Instructions
 
@@ -43,8 +43,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 - Special thanks to everyone who contributed to the development of this tool.
 
-
-EXTRA:
+## Extra
 
 To use the MATLAB scripts provided in this repository, your hyperspectral data should be in the following format:
 
@@ -64,4 +63,3 @@ To use the MATLAB scripts provided in this repository, your hyperspectral data s
 5. **Preprocessing Steps**:
     - Ensure all intensity values are normalized between 0 and 1.
     - Remove any rows with missing or corrupted data.
-
