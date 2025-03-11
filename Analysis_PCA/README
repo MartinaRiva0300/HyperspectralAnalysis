@@ -1,1 +1,2 @@
-This folder contains all scripts and MATLAB Apps created with AppDesigner to perform Principal Component Analysis on spectral hypercubes
+This folder contains all scripts and MATLAB Apps created with AppDesigner to perform Principal Component Analysis on spectral hypercubes.
+Run PCA_imaging.mlapp with AppDesigner to open the initial window. 
