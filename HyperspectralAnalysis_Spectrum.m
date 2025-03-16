@@ -1462,7 +1462,7 @@ while ne(scelta_menu,22)
 
             else %second derivative **Benedetto** 16/07/2021 
                 h_PH=PlotHypercube(fr_real(1:end-2),Hypercube_derivative); %the diff2 has two less elements
-                %Saving derivative directly- Martina 16/03/2025
+
 
             end
 
