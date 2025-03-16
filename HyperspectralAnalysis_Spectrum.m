@@ -1,11 +1,8 @@
 function HyperspectralAnalysis_Spectrum_rectangularROI
 
-% Cristian Manzoni 06.11.2019
-%
-
-% Versione 23/06/2023
-
-%Updates by Martina Riva
+% Original version: Cristian Manzoni 06.11.2019
+% First update: Benedetto Ardini 23.06.2023
+% Second update: Martina Riva 01.2025
 
 % clear all;
 
@@ -48,7 +45,6 @@ if ne(linux,0) %se si sta usando Linux
 else %se non si sta usando linux
     path(path,'C:\Users\marti\OneDrive - Politecnico di Milano\MAGISTRALE\Thesis\MatLab\AnalysisSoftware_230706');
     path(path,'C:\Users\marti\OneDrive - Politecnico di Milano\MAGISTRALE\Thesis\MatLab\AnalysisSoftware_230706\RGBspectra'); %per trovare la funzione illuminant
-
     dir0=('C:\Users\marti\OneDrive - Politecnico di Milano\MAGISTRALE\Thesis\Measurements');
 end
 %**Benedetto**
@@ -704,70 +700,6 @@ while ne(scelta_menu,22)
 
                 close(h);
 
-                % Parte vecchia
-                %                 h=waitbar(0,'Generating RGB image');
-                %                 for yy=1:a
-                %                     waitbar(yy/a,h);
-                %                     %**Benedetto** 09/10/2020
-                %                     %Con il binning assegno al pixel (xx,yy) il colore dato
-                %                     %dalla media degli spettri calcolata su di lui e sui suoi
-                %                     %pixel primi vicini. Devo distinguere tra il caso di
-                %                     %BINNING DISPARI (il pixel si trova esattamente al centro dei suoi
-                %                     %primi vicini) e il caso di BINNING PARI (dei quattro pixel
-                %                     %al centro seleziono quello in alto a destra) e devo
-                %                     %trattare in modo diverso i PIXEL AL BORDO e i PIXEL AL CENTRO.
-                %                     %calcolo del range sull'asse yy su cui dev'essere fatta la
-                %                     %media degli spettri
-                %                     if mod(bin,2)==0 %BINNING PARI
-                %                         if yy>a-bin/2 %PIXEL AL BORDO MAGGIORE
-                %                                 range_yy=(a-bin):(a);
-                %                         elseif yy<=bin/2 %PIXEL AL BORDO MINORE
-                %                                 range_yy=1:bin;
-                %                         else %PIXEL AL CENTRO
-                %                                 range_yy=(yy-bin/2+1):(yy+bin/2);
-                %                         end
-                %                     else %if mod(bin,2)!=0 %BINNING DISPARI
-                %                         if yy>a-floor(bin/2) %PIXEL AL BORDO MAGGIORE
-                %                                 range_yy=(a-bin):(a);
-                %                         elseif yy<=floor(bin/2) %PIXEL AL BORDO MINORE
-                %                                 range_yy=1:bin;
-                %                         else %PIXEL AL CENTRO
-                %                                 range_yy=(yy-floor(bin/2)):(yy+floor(bin/2));
-                %                         end
-                %                     end
-                %
-                %                     for xx=1:b
-                %                         %**Benedetto** 09/10/2020
-                %                         %calcolo del range sull'asse xx su cui dev'essere fatta la
-                %                         %media degli spettri
-                %                         if mod(bin,2)==0 %BINNING PARI
-                %                             if xx>b-bin/2 %PIXEL AL BORDO MAGGIORE
-                %                                     range_xx=(b-bin):(b);
-                %                             elseif xx<=bin/2 %PIXEL AL BORDO MINORE
-                %                                 range_xx=1:bin;
-                %                             else %PIXEL AL CENTRO
-                %                                     range_xx=(xx-bin/2+1):(xx+bin/2);
-                %                             end
-                %                         else %if mod(bin,2)!=0 %BINNING DISPARI
-                %                             if xx>b-floor(bin/2) %PIXEL AL BORDO MAGGIORE
-                %                                     range_xx=(b-bin):(b);
-                %                             elseif xx<=floor(bin/2) %PIXEL AL BORDO MINORE
-                %                                 range_xx=1:bin;
-                %                             else %PIXEL AL CENTRO
-                %                                     range_xx=(xx-floor(bin/2)):(xx+floor(bin/2));
-                %                             end
-                %                         end
-                %
-                %                         Spectrum=squeeze(abs(mean(Hyperspectrum_cube(range_yy,range_xx,:),[1,2])));
-                %
-                %                         ImmagineRGB(yy,xx,1)=R_THz1*Spectrum; % R
-                %                         ImmagineRGB(yy,xx,2)=G_THz1*Spectrum; % G
-                %                         ImmagineRGB(yy,xx,3)=B_THz1*Spectrum; % B
-                %
-                %                     end;
-                %                 end;
-                %
-                %                 close (h);
 
             else
 
@@ -885,7 +817,7 @@ while ne(scelta_menu,22)
                 case 1
                     uiwait(msgbox('Select ROI for reference spectrum','Spectral Angle Mapping','warn'));
 
-                    [~,~,Spectrum_Ref,~,cont]=Select_spectra_ROI; %**Benedetto** (aggiunta di cont)
+                    [~,~,Spectrum_Ref,~,cont]=Select_spectra_ROI_simple; %**Benedetto** (aggiunta di cont)
                 case 2
                     uiwait(msgbox('The external spectrum has to be a .txt file with the first column representing the frequency and the second column representing the intensity; other columns will be neglected.',...
                         'External spectrum file format','warn'));
@@ -1524,10 +1456,14 @@ while ne(scelta_menu,22)
 
             if derivative_flag==0 %no derivative **Benedetto** 16/07/2021
                 h_PH=PlotHypercube(fr_real,abs(Hyperspectrum_cube));
-            elseif derivative_flag==1 %first derivative **Benedetto** 16/07/2021
-                h_PH=PlotHypercube(fr_real(1:end-1),diff(abs(Hyperspectrum_cube),1,3)); %the diff has one less element
-            else %second derivative **Benedetto** 16/07/2021
-                h_PH=PlotHypercube(fr_real(1:end-2),diff(abs(Hyperspectrum_cube),2,3)); %the diff2 has two less elements
+
+            elseif derivative_flag==1 %first derivative **Benedetto** 16/07/2021 
+                h_PH=PlotHypercube(fr_real(1:end-1),Hypercube_derivative); %the diff has one less element
+
+            else %second derivative **Benedetto** 16/07/2021 
+                h_PH=PlotHypercube(fr_real(1:end-2),Hypercube_derivative); %the diff2 has two less elements
+                %Saving derivative directly- Martina 16/03/2025
+
             end
 
         case 18 %Hypercube derivative **Benedetto 16/07/2021
@@ -1548,9 +1484,14 @@ while ne(scelta_menu,22)
             if derivative_flag==0
                 uiwait(msgbox('No derivative of the Spectral Hypercube will be visualize','warn'));
             elseif derivative_flag==1
-                uiwait(msgbox('Spectrum on area and Plot Hypercube buttons will visualize the first derivative','warn'));
+                uiwait(msgbox('Spectrum on area and Plot Hypercube buttons will visualize the first derivative.','warn'));
+                Hypercube_derivative=diff(abs(Hyperspectrum_cube),1,3);
+                Intens_der=sum(abs(Hypercube_derivative),3);
+
             else
-                uiwait(msgbox('Spectrum on area and Plot Hypercube buttons will visualize the second derivative','warn'));
+                Hypercube_derivative=diff(abs(Hyperspectrum_cube),2,3);
+                Intens_der=sum(abs(Hypercube_derivative),3);
+                uiwait(msgbox('Spectrum on area and Plot Hypercube buttons will visualize the second derivative.','warn'));
             end
 
 
@@ -1569,10 +1510,22 @@ while ne(scelta_menu,22)
 
 
             %**Benedetto 23/06/2023
+
+            
             if exist('file_totCal')
-                save_hypercube(Hyperspectrum_cube,f,NoSaturationMap,fr_real,file_totCal,Intens,dir2);
+                %Saving derivative directly- Martina 16/03/2025
+                if derivative_flag~0 %first or second derivative        
+                    save_hypercube(Hypercube_derivative,f(1:end-1),NoSaturationMap,fr_real(1:end-1), file_totCal, Intens_der, dir2);
+                else
+                    save_hypercube(Hyperspectrum_cube,f,NoSaturationMap,fr_real,file_totCal,Intens,dir2);
+                end
             else
-                save_hypercube(Hyperspectrum_cube,f,NoSaturationMap,[],[],Intens,dir2);
+                %Saving derivative directly- Martina 16/03/2025                
+                if derivative_flag~0 %first or second derivative 
+                    save_hypercube(Hypercube_derivative,f(1:end-1),NoSaturationMap,[], [], Intens_der, dir2);
+                else
+                    save_hypercube(Hyperspectrum_cube,f,NoSaturationMap,[],[],Intens,dir2);
+                end
             end
 
             % %             stringa=['  -- Saving current Hypercube in ',file_tot,' --'];
@@ -1846,16 +1799,98 @@ end;
 
     end
 
+  function [Spectrum_subAveWL,Spectrum_subStdWL,...
+            Spectrum_subAve,Spectrum_subStd,cont]=Select_spectra_ROI_simple % Selects a ROI and calculates the average spectrum of that ROI  %**Benedetto** (aggiunta di cont)
+    
+        subplot(h1);
+        [ThisAOI, xr, yr] = roipoly();
+        hold all;
+        line(xr,yr,'Linewidth',2,'Color',mm(mod(num_spectrum-1,8)+1,:)); % ,'Color','r'); % display the outer border of the mask as a polygon
+        cont=0;
+        
+        for y1=1:a
+            
+            for x1=1:b
+                
+                if ThisAOI(y1,x1)==1 && NoSaturationMap(y1,x1)==1 %**Benedetto** saturationMap 25/10/2020
+                    cont=cont+1;
+                    Spectrum=squeeze(Hyperspectrum_cube(y1,x1,:));
+                    Spectrum_sub(:,cont)=Spectrum;
+                    
+                end
+                
+            end
+            
+        end
+        
+        if derivative_flag==0 %no derivative **Benedetto** 16/07/2021
+            Spectrum_subAve=abs(mean(Spectrum_sub,2)); %**Benedetto** abs 09/10/2020
+            Spectrum_subStd=sqrt(var(abs(Spectrum_sub'))'); %**Benedetto** abs 09/10/2020
+        elseif derivative_flag==1 %first derivative **Benedetto** 16/07/2021
+            mean_Spectrum_sub=abs(mean(Spectrum_sub,2));
+            Spectrum_subAve_diff=diff(mean_Spectrum_sub,1);
+            Spectrum_subAve=zeros(size(mean_Spectrum_sub)); %Spectrum_subAve must have the same dimension as mean_Spectrum_sub
+            Spectrum_subAve(1:end-1)=Spectrum_subAve_diff;
+            Spectrum_subAve(end)=Spectrum_subAve_diff(end); %the last element is equal to the second-last
+            clear mean_Spectrum_sub Spectrum_subAve_diff;
+            
+            Std_Spectrum_sub=sqrt(var(abs(Spectrum_sub'))');
+            Spectrum_subStd_diff=diff(Std_Spectrum_sub,1);
+            Spectrum_subStd=zeros(size(Std_Spectrum_sub)); %Spectrum_subStd must have the same dimension as mean_Spectrum_sub
+            Spectrum_subStd(1:end-1)=Spectrum_subStd_diff;
+            Spectrum_subStd(end)=Spectrum_subStd_diff(end); %the last element is equal to the second-last
+            clear Std_Spectrum_sub Spectrum_subStd_diff;
+        else %second derivative **Benedetto** 16/07/2021
+            mean_Spectrum_sub=abs(mean(Spectrum_sub,2));
+            Spectrum_subAve_diff=diff(mean_Spectrum_sub,2);
+            Spectrum_subAve=zeros(size(mean_Spectrum_sub)); %Spectrum_subAve must have the same dimension as mean_Spectrum_sub
+            Spectrum_subAve(1:end-2)=Spectrum_subAve_diff;
+            Spectrum_subAve(end-1)=Spectrum_subAve_diff(end);
+            Spectrum_subAve(end)=Spectrum_subAve_diff(end); %the last two elements are equal to the third-last
+            clear mean_Spectrum_sub Spectrum_subAve_diff;
+            
+            Std_Spectrum_sub=sqrt(var(abs(Spectrum_sub'))');
+            Spectrum_subStd_diff=diff(Std_Spectrum_sub,2);
+            Spectrum_subStd=zeros(size(Std_Spectrum_sub)); %Spectrum_subStd must have the same dimension as mean_Spectrum_sub
+            Spectrum_subStd(1:end-2)=Spectrum_subStd_diff;
+            Spectrum_subStd(end-1)=Spectrum_subStd_diff(end);
+            Spectrum_subStd(end)=Spectrum_subStd_diff(end); %the last two elements are equal to the third-last
+            clear Std_Spectrum_sub Spectrum_subStd_diff;
+        end
+            
+               
+        % Correction frequency -> wavelength: SpettroC1*fr_real.^2/c
+        SpectrumWL=Spectrum_sub.*fr_real(ones(1,size(Spectrum_sub,2)),:).'.^2/c;
+        
+        Spectrum_subAveWL=abs(mean(SpectrumWL,2)); %**Benedetto** abs 09/10/2020
+        Spectrum_subStdWL=sqrt(var(abs(SpectrumWL'))'); %**Benedetto** abs 09/10/2020
+       
+    end
+
+
 
     function [Spectrum_subAveWL,Spectrum_subStdWL,...
             Spectrum_subAve,Spectrum_subStd,cont, aspectRatio, width, height]=Select_spectra_ROI(aspectRatio, width, height) % Selects a ROI and calculates the average spectrum of that ROI  %**Benedetto** (aggiunta di cont)
 
         subplot(h1);
-        if aspectRatio>1500
-        ROItype=Dinput('\n\n   Select ROI type: (0 = generic, 1 = rectangular): ',0);
+        if aspectRatio>1500 %arbitrary number 
+            %ROItype=Dinput('\n\n   Select ROI type: (0 = generic, 1 = rectangular): ',0);
+            prompt={'ROI type: generic (0); rectangular (1).'};
+            name='Select ROI type';
+            numlines=1;
+            defaultanswer={num2str(0)};
+
+            options.Resize='on';
+            options.WindowStyle='normal';
+            options.Interpreter='tex';
+
+            answer=inputdlg(prompt,name,numlines,defaultanswer,options);
+            ROItype=str2double(cell2mat(answer)); %this is the flag that manages the different cases
+
         else
             ROItype=2;
         end
+
         switch ROItype
     case 0
         [mask, xr, yr] = roipoly();
