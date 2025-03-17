@@ -1,4 +1,4 @@
-function HyperspectralAnalysis_Spectrum_rectangularROI
+function HyperspectralAnalysis_Spectrum
 
 % Original version: Cristian Manzoni 06.11.2019
 % First update: Benedetto Ardini 23.06.2023
