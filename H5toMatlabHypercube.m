@@ -3,11 +3,22 @@
 %the same folder of the .h5 file. The .mat temporal hypercube is a struct
 %file with HyperMatrix (the temporal hypercube) and t (the delay axis)
 
-%dir0=('C:\Users\HARDi\OneDrive\Desktop\Tesi');
+%This program can be run directly without input arguments or called from another program 
+% (with inputs filename_Hyper, pathname_Hyper)
 
-[filename_Hyper, pathname_Hyper] = uigetfile('*.h5', 'Load Hypercube',dir0);
+function H5toMatlabHypercube(varargin)
 
-path(path,pathname_Hyper);
+if nargin==0 %run directly the program
+    %load hypercube
+    [filename_Hyper, pathname_Hyper] = uigetfile('*.h5', 'Load Hypercube');
+    path(path,pathname_Hyper);
+
+else %pass filename_Hyper and pathname_Hyper
+    filename_Hyper=varargin{1};
+    pathname_Hyper=varargin{2};
+
+end
+
 
 [HyperMatrix,el_size,step]=H5ReadStackHyper(filename_Hyper);
 % el_size = [dx,dy,dz]
@@ -23,8 +34,9 @@ HyperMatrix=permute(HyperMatrix,[2 1 3]); %change X and Y as they are in the mea
 filename=[filename_Hyper(1:end-3) '_hyp.mat'];
 file_tot=[pathname_Hyper,filename];
 
-h=waitbar(0.5,'Saving hypercube in .mat file');
+%h=waitbar(0.5,'Saving hypercube in .mat file');
 save(file_tot,'t','HyperMatrix','-v7.3');
-close(h);
+%close(h);
 
-clear all;
+%clear all;
+end
