@@ -637,34 +637,6 @@ for nn=1:pnt
     HyperMatrix(:,:,nn)=HyperMatrix(:,:,nn)-Averages;
 end;
 
-%%% Spostato sopra
-% pola=Dinput('\n\n    Polarizers angle: (0 = parallel, 1 = crossed): ',1);
-%
-% if pola % if polarizers are crossed, data should be flipped
-%     HyperMatrixSwap=-HyperMatrix;
-%     HyperMatrix=HyperMatrixSwap;
-%     clear HyperMatrixSwap;
-% end;
-%
-% reverse=Dinput('    Reverse Delay Axis: (0 = no, 1 = yes): ',0);
-%
-% if reverse
-%
-%     h=waitbar(0,'Reversing Time axis');
-%     HyperMatrixSwap=zeros(size(HyperMatrix));
-%
-%     for nn=1:pnt
-%
-%         waitbar(nn/(pnt+10),h);
-%         HyperMatrixSwap(:,:,nn)=HyperMatrix(:,:,pnt-nn+1);
-%     end;
-%
-%     HyperMatrix=HyperMatrixSwap;
-%     clear HyperMatrixSwap;
-%
-%     close(h);
-%
-% end;
 
 % Extraction of a subset of interferograms
 
@@ -885,530 +857,442 @@ else
     end
 end
 
-fprintf('\n  -- Spectra of preview pixels --');
+preview=Dinput('\n\n Do you want to see a preview for selected pixels spectra (Yes [1]; No [0])? ', 0); 
+% there are 2 possibilities:
+%     [1]-> you can load the calibration or make it 
+%     [0]-> you avoid preview, but you must have calibration
 
-conversionWindow=WConversion_cryst; %finestra di aiuto per le conversioni **BENEDETTO**
-set(conversionWindow,'OuterPosition', [205 -7 114.5714 35.1765]);
+switch preview
+    case 1 %Preview
 
-% sp=round(Dinput('\n\n    How many preview pixels? ',3));
-fmin=Dinput('\n\n    Minimum pseudo-frequency: ',0);
-fmax=Dinput('    Maximum pseudo-frequency: ',1/(2*step));
-resol=round(Dinput('    Number of spectral points: ',500));
+        fprintf('\n  -- Spectra of preview pixels --');
 
-close(conversionWindow);
+        conversionWindow=WConversion_cryst; %finestra di aiuto per le conversioni **BENEDETTO**
+        set(conversionWindow,'OuterPosition', [205 -7 114.5714 35.1765]);
 
-linearFit=Dinput('\n    Subtraction from interferogram of: [0: constant line - 1: linear trend- 2: quadratic trend]? ',0);
-trapz=round(Dinput('\n    Apodization (0: none - 1: Happ-Genzel - 2: 3-term Blackman-Harris - 3: 4-term Blackman-Harris - 4: Triangular - 5: Supergaussian - 6: Trapezoidal)? ',1)); %**Benedetto**
-center_find=round(Dinput('\n    Interferograms center calculation (0: exactly in the middle   - 1: function baricenter)? ',1)); %**Benedetto** 14/01/2021
+        % sp=round(Dinput('\n\n    How many preview pixels? ',3));
+        fmin=Dinput('\n\n    Minimum pseudo-frequency: ',0);
+        fmax=Dinput('    Maximum pseudo-frequency: ',1/(2*step));
+        resol=round(Dinput('    Number of spectral points: ',500));
 
-prompt={'Pixels binning for the mean'}; %Possibility to select interferogram mean over more than one pixel **Benedetto** 11/01/2022
-name='Select pixels mean';
-numlines=1;
-defaultanswer={num2str(1)};
+        close(conversionWindow);
 
-options.Resize='on';
-options.WindowStyle='normal';
-options.Interpreter='tex';
+        linearFit=Dinput('\n    Subtraction from interferogram of: [0: constant line - 1: linear trend- 2: quadratic trend]? ',0);
+        trapz=round(Dinput('\n    Apodization (0: none - 1: Happ-Genzel - 2: 3-term Blackman-Harris - 3: 4-term Blackman-Harris - 4: Triangular - 5: Supergaussian - 6: Trapezoidal)? ',1)); %**Benedetto**
+        center_find=round(Dinput('\n    Interferograms center calculation (0: exactly in the middle   - 1: function baricenter)? ',1)); %**Benedetto** 14/01/2021
 
-answer=inputdlg(prompt,name,numlines,defaultanswer,options);
+        prompt={'Pixels binning for the mean'}; %Possibility to select interferogram mean over more than one pixel **Benedetto** 11/01/2022
+        name='Select pixels mean';
+        numlines=1;
+        defaultanswer={num2str(1)};
 
-bin_preview=str2double(cell2mat(answer));
-if bin_preview==0
-    bin_preview=1;
-end
+        options.Resize='on';
+        options.WindowStyle='normal';
+        options.Interpreter='tex';
 
-%%%**Benedetto** ha messo come commento le seguenti righe il 09/10/2020
-% % %**Benedetto** 26/09/2020
-% % realPart=Dinput('\n    SPECTRUM: [0: absolute value (asymmetric interf., e.g. Raman) - 1: real part (symmetric interf.)]? ',1);
-% % %**Benedetto** 26/09/2020
+        answer=inputdlg(prompt,name,numlines,defaultanswer,options);
 
-if trapz==6 %**Benedetto**
+        bin_preview=str2double(cell2mat(answer));
+        if bin_preview==0
+            bin_preview=1;
+        end
 
-    auto_max=Dinput('\n    Trapezoidal apodization. Retrieval of maximum: [0: automatic - 1: manual]',0);
+        %%%**Benedetto** ha messo come commento le seguenti righe il 09/10/2020
+        % % %**Benedetto** 26/09/2020
+        % % realPart=Dinput('\n    SPECTRUM: [0: absolute value (asymmetric interf., e.g. Raman) - 1: real part (symmetric interf.)]? ',1);
+        % % %**Benedetto** 26/09/2020
 
-    if auto_max==1
-        hh=figure;
+        if trapz==6 %**Benedetto**
 
-        Aver_correl=sum(Corr_summ,2); % Average correlation
+            auto_max=Dinput('\n    Trapezoidal apodization. Retrieval of maximum: [0: automatic - 1: manual]',0);
 
-        % plot(Corr_summ,'linewidth',2); axis tight;
-        plot(Aver_correl,'linewidth',2); axis tight;
+            if auto_max==1
+                hh=figure;
 
-        zoom xon; pause;
-        [Center,~]=ginput(1);
+                Aver_correl=sum(Corr_summ,2); % Average correlation
 
-        close(hh);
+                % plot(Corr_summ,'linewidth',2); axis tight;
+                plot(Aver_correl,'linewidth',2); axis tight;
 
-    end;
+                zoom xon; pause;
+                [Center,~]=ginput(1);
 
-end;
+                close(hh);
 
-% ref=round(Dinput('\n    The first point will be a reference [0: no - 1: yes]? ',0));
-
-tmax=tt(end);
-tmaxindex=find(tt<=tmax,1,'last'); % Index of the last element
-
-figure(h0); axes(h0a);
-% % linear scale
-imagesc(Sample.^0.5); axis equal; axis off % it was Sample
-colormap(gray(256));
-
-title(sprintf('Gamma: 0.5 - Zoom if necessary, then ENTER - RIGHT click when finished\nMean over %d x %d pixels selected',bin_preview,bin_preview));
-
-f=linspace(fmin,fmax,resol);
-
-tt0=tt;
-tt=tt0(1:tmaxindex);
-
-Dt=diff(tt);
-Dt(end+1)=Dt(end);
-exps=exp(-1i*2*pi*tt'*f);
-
-% for hh=1:sp
-
-hh=0;
-
-figure(h0); axes(h0a);
-pause; [x,y,button]=ginput(1);
-
-while button==1
-
-    hh=hh+1;
-    x=round(x);
-    y=round(y);
-
-
-    if mod(bin_preview,2)==0 %bin_preview even
-        C0=squeeze(mean(HyperMatrix(y-(bin_preview/2-1):y+bin_preview/2,x-(bin_preview/2-1):x+bin_preview/2,:),[1,2]))';
-    else %bin_preview odd
-        C0=squeeze(mean(HyperMatrix(y-floor(bin_preview/2):y+floor(bin_preview/2),x-floor(bin_preview/2):x+floor(bin_preview/2),:),[1,2]))';
-    end
-
-    % cut of the trace
-    % C0=C0(1:tmaxindex);
-    C=C0;
-    % C=medfilt1(C0,3); % removes glitch
-    % C=medfilt1(C,3); % once again
-
-    if linearFit  % Subtracts a line instead of a constant
-
-        FitPar = polyfit(tt,C,1);
-
-        FitLinear = polyval(FitPar,tt);
-        C=C-FitLinear;
-
-    elseif linearFit==2
-
-        FitPar = polyfit(tt,C,2);
-
-        FitQuadr = polyval(FitPar,tt);
-        C=C-FitQuadr;
-    end
-
-    %**Benedetto**
-    if trapz==6 %the CASE OF TRAPEZOIDAL apodization is treated independently **Benedetto**
-
-        if auto_max==1
-
-            I=round(Center);
-            [maxC,~] = max(C);
-        else
-
-            [maxC,I] = max(C); % finds the position of the max
+            end;
 
         end;
 
-        I1=find(tt-tt(I)<=(tt(I)-tt(1))); % tt(I)-tt(1) is the distance between the first
-        % point and the peak. It will be the distance
-        % between the peak and the last point
+        % ref=round(Dinput('\n    The first point will be a reference [0: no - 1: yes]? ',0));
 
-        tt1=tt(I1); % row
-        y1=C(I1); % I select only the symmetric correlation
+        tmax=tt(end);
+        tmaxindex=find(tt<=tmax,1,'last'); % Index of the last element
 
-        minC = min(C); % finds the min
+        figure(h0); axes(h0a);
+        % % linear scale
+        imagesc(Sample.^0.5); axis equal; axis off % it was Sample
+        colormap(gray(256));
 
-        maxC=maxC+Averages(y,x);
-        minC=minC+Averages(y,x);
+        title(sprintf('Gamma: 0.5 - Zoom if necessary, then ENTER - RIGHT click when finished\nMean over %d x %d pixels selected',bin_preview,bin_preview));
 
-        Contrast(hh)=(maxC-minC)/(maxC+minC);
-        Ave(hh)=Averages(y,x);
-        Correl(hh,:)=(1-2*pola)*C+Averages(y,x); % Keeps the correlation; (1-2*pola) is -1 or +1, depending whether the correlation has been reversed
+        f=linspace(fmin,fmax,resol);
 
-        Dt_1=diff(tt1);
-        Dt_1(end+1)=Dt_1(end);
+        tt0=tt;
+        tt=tt0(1:tmaxindex);
 
-        exps_1=exp(-1i*2*pi*tt1'*f);
+        Dt=diff(tt);
+        Dt(end+1)=Dt(end);
+        exps=exp(-1i*2*pi*tt'*f);
 
-        s_1=y1.*Apodization(4,length(y1),I); % row
+        % for hh=1:sp
 
-        % fourier computed with the exponential matrix and no loop involved
-        yf_1=(Dt_1.*s_1)*exps_1;
+        hh=0;
 
-        %%%**Benedetto** ha messo come commento le seguenti righe il 09/10/2020
-        % %             phase=angle(yf_1); % This phase will be used to correct the spectral phase of the entire trace
-        % %
-        % %             if realPart %**Benedetto** 26/09/2020
-        % %                 %Interpolazione mediante least mean squares
-        % %                 xxx=f;
-        % %                 Amp=abs(yf_1).^2;
-        % %                 faseApp=phase;
-        % %
-        % %                 X=[ sum(Amp.*xxx.^2) sum(Amp.*xxx.^1);
-        % %                     sum(Amp.*xxx.^1) sum(Amp.*xxx.^0)];
-        % %
-        % %                 Y=[ sum(Amp.*faseApp.*xxx.^1) sum(Amp.*faseApp.*xxx.^0)]';
-        % %
-        % %                 Coeff=pinv(X)*Y;
-        % %
-        % %                 faseSim=Coeff(1).*xxx+Coeff(2); %considera solo la fase dello spettro
-        % %                 %fine interpolazione mediante least mean squares
-        % %
-        % %             else %if realPart==0
-        % %                 faseSim=phase; %considera la fase dello spettro+rumore
-        % %             end
+        figure(h0); axes(h0a);
+        pause; [x,y,button]=ginput(1);
 
-        % double Trapezoidal filter
-        linear=1/(tt1(end)-tt1(1))*(tt1-tt1(1));
-        Trap=ones(size(C));
-        Trap(1:length(tt1))=linear;
+        while button==1
 
-        Trap(end:-1:end-length(tt1)+1)=linear; % Trapezoidal apodization
+            hh=hh+1;
+            x=round(x);
+            y=round(y);
 
-        yf_ok=(Dt.*(C.*Trap))*exps;
-        SpettroC1(hh,:)=2*(yf_ok); %**Benedetto** 09/10/2020
-        %%%**Benedetto** ha messo come commento le seguenti righe il 09/10/2020
-        % %             SpettroC1(hh,:)=2*(yf_ok).*exp(-1j*faseSim);
 
-    else %the OTHER CASES of apodization are treated here
+            if mod(bin_preview,2)==0 %bin_preview even
+                C0=squeeze(mean(HyperMatrix(y-(bin_preview/2-1):y+bin_preview/2,x-(bin_preview/2-1):x+bin_preview/2,:),[1,2]))';
+            else %bin_preview odd
+                C0=squeeze(mean(HyperMatrix(y-floor(bin_preview/2):y+floor(bin_preview/2),x-floor(bin_preview/2):x+floor(bin_preview/2),:),[1,2]))';
+            end
 
-        if center_find % **Benedetto** 14/01/2021
-            I=round([1:length(C)]*(C.^2)'./(sum(C.^2)+1)); % Strategy to find the baricenter (+1 is required to avoid dividing by 0)
-        else
-            I=length(C)./2;
+            % cut of the trace
+            % C0=C0(1:tmaxindex);
+            C=C0;
+            % C=medfilt1(C0,3); % removes glitch
+            % C=medfilt1(C,3); % once again
+
+            if linearFit  % Subtracts a line instead of a constant
+
+                FitPar = polyfit(tt,C,1);
+
+                FitLinear = polyval(FitPar,tt);
+                C=C-FitLinear;
+
+            elseif linearFit==2
+
+                FitPar = polyfit(tt,C,2);
+
+                FitQuadr = polyval(FitPar,tt);
+                C=C-FitQuadr;
+            end
+
+            %**Benedetto**
+            if trapz==6 %the CASE OF TRAPEZOIDAL apodization is treated independently **Benedetto**
+
+                if auto_max==1
+
+                    I=round(Center);
+                    [maxC,~] = max(C);
+                else
+
+                    [maxC,I] = max(C); % finds the position of the max
+
+                end;
+
+                I1=find(tt-tt(I)<=(tt(I)-tt(1))); % tt(I)-tt(1) is the distance between the first
+                % point and the peak. It will be the distance
+                % between the peak and the last point
+
+                tt1=tt(I1); % row
+                y1=C(I1); % I select only the symmetric correlation
+
+                minC = min(C); % finds the min
+
+                maxC=maxC+Averages(y,x);
+                minC=minC+Averages(y,x);
+
+                Contrast(hh)=(maxC-minC)/(maxC+minC);
+                Ave(hh)=Averages(y,x);
+                Correl(hh,:)=(1-2*pola)*C+Averages(y,x); % Keeps the correlation; (1-2*pola) is -1 or +1, depending whether the correlation has been reversed
+
+                Dt_1=diff(tt1);
+                Dt_1(end+1)=Dt_1(end);
+
+                exps_1=exp(-1i*2*pi*tt1'*f);
+
+                s_1=y1.*Apodization(4,length(y1),I); % row
+
+                % fourier computed with the exponential matrix and no loop involved
+                yf_1=(Dt_1.*s_1)*exps_1;
+
+                %%%**Benedetto** ha messo come commento le seguenti righe il 09/10/2020
+                % %             phase=angle(yf_1); % This phase will be used to correct the spectral phase of the entire trace
+                % %
+                % %             if realPart %**Benedetto** 26/09/2020
+                % %                 %Interpolazione mediante least mean squares
+                % %                 xxx=f;
+                % %                 Amp=abs(yf_1).^2;
+                % %                 faseApp=phase;
+                % %
+                % %                 X=[ sum(Amp.*xxx.^2) sum(Amp.*xxx.^1);
+                % %                     sum(Amp.*xxx.^1) sum(Amp.*xxx.^0)];
+                % %
+                % %                 Y=[ sum(Amp.*faseApp.*xxx.^1) sum(Amp.*faseApp.*xxx.^0)]';
+                % %
+                % %                 Coeff=pinv(X)*Y;
+                % %
+                % %                 faseSim=Coeff(1).*xxx+Coeff(2); %considera solo la fase dello spettro
+                % %                 %fine interpolazione mediante least mean squares
+                % %
+                % %             else %if realPart==0
+                % %                 faseSim=phase; %considera la fase dello spettro+rumore
+                % %             end
+
+                % double Trapezoidal filter
+                linear=1/(tt1(end)-tt1(1))*(tt1-tt1(1));
+                Trap=ones(size(C));
+                Trap(1:length(tt1))=linear;
+
+                Trap(end:-1:end-length(tt1)+1)=linear; % Trapezoidal apodization
+
+                yf_ok=(Dt.*(C.*Trap))*exps;
+                SpettroC1(hh,:)=2*(yf_ok); %**Benedetto** 09/10/2020
+                %%%**Benedetto** ha messo come commento le seguenti righe il 09/10/2020
+                % %             SpettroC1(hh,:)=2*(yf_ok).*exp(-1j*faseSim);
+
+            else %the OTHER CASES of apodization are treated here
+
+                if center_find % **Benedetto** 14/01/2021
+                    I=round([1:length(C)]*(C.^2)'./(sum(C.^2)+1)); % Strategy to find the baricenter (+1 is required to avoid dividing by 0)
+                else
+                    I=length(C)./2;
+                end
+
+                if trapz==0 %if there's no apodization
+                    Trap=ones(1,length(C));
+                    s_0=C; %row
+                else %if there's apodization different from the trapezoidal one
+                    Trap=Apodization(trapz,length(C),I,7);
+                    s_0=C.*Trap; % row
+                end
+
+                % fourier computed with the exponential matrix and no loop involved
+                yf_0=(Dt.*s_0)*exps;
+
+                %%%**Benedetto** ha messo come commento le seguenti righe il 09/10/2020
+                % %         phase=angle(yf_0); % This phase will be used to correct the spectral phase of the entire trace
+                % %
+                % %         if realPart %**Benedetto** 26/09/2020
+                % %             %Interpolazione mediante least mean squares
+                % %             xxx=f;
+                % %             Amp=abs(yf_0).^2;
+                % %             faseApp=unwrap(phase); % era senza unwrap
+                % %
+                % %             X=[ sum(Amp.*xxx.^2) sum(Amp.*xxx.^1);
+                % %                 sum(Amp.*xxx.^1) sum(Amp.*xxx.^0)];
+                % %
+                % %             Y=[ sum(Amp.*faseApp.*xxx.^1) sum(Amp.*faseApp.*xxx.^0)]';
+                % %
+                % %             Coeff=pinv(X)*Y;
+                % %
+                % %             faseSim=Coeff(1).*xxx+Coeff(2); %considera solo la fase dello spettro
+                % %             %fine interpolazione mediante least mean squares
+                % %
+                % %         else %if realPart==0
+                % %                 faseSim=phase; %considera la fase dello spettro+rumore
+                % %         end
+
+                % %         SpettroC1(hh,:)=2*(yf_0).*exp(-1j*faseSim);
+
+                SpettroC1(hh,:)=2*(yf_0); %**Benedetto** 09/10/2020
+
+
+                % figure(30+hh);
+                figure(h0); axes(h0b);
+                plot(tt,C0+Averages(y,x),'m',tt,C,'r',tt,C.*Trap,'b',tt,Trap*max(C.*Trap),'k','linewidth',2); axis tight
+
+                figure(h0); axes(h0c);
+                plot(f,abs(SpettroC1(hh,:)),'b','linewidth',2); %real-->abs **Benedetto** 09/10/2020
+
+                pause; [x,y,button]=ginput(1);
+
+            end;
+
+            sp=hh;
+
+            % end;
+
+            for hh=1:sp
+                SpettroC2(hh,:)=SpettroC1(hh,:)./max(SpettroC1(hh,:)); % era abs(reference);
+            end;
+
+            % Frequency calibration
+            h3=figure(3);
+
+            subplot(2,1,1)
+            plot(f,abs(SpettroC1),'linewidth',2); axis tight; %real-->abs **Benedetto** 09/10/2020
+            title('Not normalized')
+            legend;
+
+
+            subplot(2,1,2)
+            plot(f,abs(SpettroC2),'linewidth',2); axis tight; %real-->abs **Benedetto** 09/10/2020
+            legend;
+
+            h3a=gca;
+            title('Normalized to white - Select Peaks for frequency calibration - RIGHT click when finished');
+
+            figure(h3); axes(h3a);
+            cal=0;
+            [X,Y,BUTTON] = ginput(1);
+            while BUTTON<=1
+                cal=cal+1;
+                answer=inputdlg('Corresponding wavelength (nm)','Wavelength calibration',1,{'500'});
+                fr_realC(cal)=c./(str2double(answer)*1e-9)/1e12; % Frequency in THz
+                fr_pseudoC(cal)=X;
+
+                figure(h3); axes(h3a);
+                [X,Y,BUTTON] = ginput(1);
+            end
+
+            file_totCal=[];
+
+            % To be moved
+            switch cal
+
+                case {0,1}
+                    load_cal=round(Dinput('\n\n    Load calibration [0: no - 1: yes]? ',0));
+
+                    if load_cal
+
+                        [filename_Cal, pathname_Cal] = uigetfile('*.mat', 'Load Calibration',dir0);
+                        file_totCal=[pathname_Cal,filename_Cal];
+
+                        stringa=[' *** Loaded calibration ',file_totCal,' ***'];
+                        fprintf('\n\n%s',stringa);
+
+                        load(file_totCal); % Contains  fr_real0 and f_0
+                        cal=2; % For next steps, this means that calibration is available
+
+                        fr_real=interp1(f_0,fr_real0,f);
+
+                        figure(h3);
+
+                        subplot(2,1,1);
+                        plot(fr_real,abs(SpettroC1),'linewidth',2); axis tight %real-->abs **Benedetto** 09/10/2020
+                        xlabel('Frequency (THz)')
+
+                        % Correction frequency -> wavelength: SpettroC1*fr_real.^2/c
+                        subplot(2,1,2);
+                        plot(c./(fr_real*1e12)/1e-9,...
+                            abs(SpettroC1.*fr_real(ones(1,size(SpettroC1,1)),:).^2/c),...
+                            'linewidth',2); axis tight %real-->abs **Benedetto** 09/10/2020
+                        xlabel('Wavelength (nm)')
+                        % spectrumLabel(gca)
+
+                    end
+                case 2
+                    M=(fr_realC(2)-fr_realC(1))/(fr_pseudoC(2)-fr_pseudoC(1));
+                    Q=fr_realC(1)-M*fr_pseudoC(1);
+                    fr_real=M*f+Q;
+
+                    % Saving calibration
+                    fprintf('\n  -- Saving calibration: calibration ranges --');
+
+                    fr_real02=c/(abs(Dinput('\n\n    Shorter calibration wavelength (nm): ',300))*1e-9)/1e12; % highest frequency, in THz
+                    fr_real01=c/(abs(Dinput('    Longer calibration wavelength (nm): ',1200))*1e-9)/1e12; % lowest frequency, in THz
+
+                    f_01=(fr_real01-Q)/M;
+                    f_02=(fr_real02-Q)/M;
+
+                    f_0=linspace(f_01,f_02,500);
+                    fr_real0=M*f0+Q;
+
+                    figure(h3);
+
+                    subplot(2,2,1);
+                    plot(fr_real,abs(SpettroC1),'linewidth',2); axis tight %real-->abs **Benedetto** 09/10/2020
+                    xlabel('Frequency (THz)')
+
+                    % Correction frequency -> wavelength: SpettroC1*fr_real.^2/c
+                    subplot(2,2,2);
+                    plot(c./(fr_real*1e12)/1e-9,...
+                        abs(SpettroC1.*fr_real(ones(1,size(SpettroC1,1)),:).^2/c),...
+                        'linewidth',2); axis tight %real-->abs **Benedetto** 09/10/2020
+                    % spectrumLabel(gca);
+                    xlabel('Wavelength (nm)');
+
+                    subplot(2,2,3);
+                    plot(f,fr_real,f_0,fr_real0,fr_pseudoC,fr_realC,'*','linewidth',3);
+                    xlabel('Pseudofrequency');
+                    ylabel('Optical frequency [THz]');
+                    legend('Interpolation1','Interpolation2','Measurement');
+
+                    [filename_Cal, pathname_Cal] = uiputfile('*.mat', 'Save Calibration as',dir0);
+                    file_tot=[pathname_Cal,filename_Cal];
+                    save(file_tot,'f_0','fr_real0'); % f_0: pseudofrequency; f_real0: optical frequency (THz)
+
+                    stringa=['  -- Calibration saved in ',file_tot,' --'];
+                    fprintf('\n%s',stringa);
+
+                otherwise
+                    % polynomial interpolation
+                    [P,S,MU] = polyfit(fr_pseudoC,fr_realC,2);
+                    fr_real = polyval(P,f,[],MU);
+
+                    fprintf('\n  -- Saving calibration: calibration ranges --');
+
+                    fr_real02=c/(abs(Dinput('\n\n    Shorter calibration wavelength (nm): ',300))*1e-9)/1e12; % highest frequency, in THz
+                    fr_real01=c/(abs(Dinput('    Longer calibration wavelength (nm): ',1200))*1e-9)/1e12; % lowest frequency, in THz
+
+                    fr_real0=linspace(fr_real01,fr_real02,500);
+
+                    [P1,S1,MU] = polyfit(fr_realC,fr_pseudoC,2);
+                    f_0 = polyval(P1,fr_real0,[],MU);
+
+                    figure(h3);
+
+                    subplot(2,2,1);
+                    plot(fr_real,abs(SpettroC1),'linewidth',2); axis tight %real-->abs **Benedetto** 09/10/2020
+                    xlabel('Frequency [THz]')
+
+                    % Correction frequency -> wavelength: SpettroC1*fr_real.^2/c
+                    subplot(2,2,2);
+                    plot(c./(fr_real*1e12)/1e-9,...
+                        abs(SpettroC1.*fr_real(ones(1,size(SpettroC1,1)),:).^2/c),...
+                        'linewidth',2); axis tight %real-->abs **Benedetto** 09/10/2020
+                    xlabel('Wavelength [nm]')
+                    % spectrumLabel(gca)
+
+                    subplot(2,2,3);
+                    plot(f,fr_real,f_0,fr_real0,fr_pseudoC,fr_realC,'*','linewidth',3);
+                    xlabel('Pseudofrequency');
+                    ylabel('Optical frequency [THz]');
+                    legend('Interpolation1','Interpolation2','Measurement');
+
+                    % Saving calibration
+                    [filename_Cal, pathname_Cal] = uiputfile('*.mat', 'Save Calibration as',dir0);
+                    file_totCal=[pathname_Cal,filename_Cal];
+                    save(file_totCal,'f_0','fr_real0'); % f_0: pseudofrequency; f_real0: optical frequency (THz)
+
+                    stringa=['  -- Calibration saved in ',file_tot,' --'];
+                    fprintf('\n%s',stringa);
+            end
+
+            Dt=diff(tt);
+            Dt(end+1)=Dt(end);
+
+            % hhh=figure;
+            map1=colormap(jet(512));
+            % xx=linspace(0,255,256); %**Benedetto**
+            % yy=linspace(0,63,512);
+            % map1=interp1(xx,map,yy);
+            %
+            % zz=log(yy/63)-log(yy(2)/63); zz=zz/max(zz)*63; zz(1)=0;
+            % maplog=interp1(xx,map,zz);
+            % close(hhh);
+
         end
-
-        if trapz==0 %if there's no apodization
-            Trap=ones(1,length(C));
-            s_0=C; %row
-        else %if there's apodization different from the trapezoidal one
-            Trap=Apodization(trapz,length(C),I,7);
-            s_0=C.*Trap; % row
-        end
-
-        % fourier computed with the exponential matrix and no loop involved
-        yf_0=(Dt.*s_0)*exps;
-
-        %%%**Benedetto** ha messo come commento le seguenti righe il 09/10/2020
-        % %         phase=angle(yf_0); % This phase will be used to correct the spectral phase of the entire trace
-        % %
-        % %         if realPart %**Benedetto** 26/09/2020
-        % %             %Interpolazione mediante least mean squares
-        % %             xxx=f;
-        % %             Amp=abs(yf_0).^2;
-        % %             faseApp=unwrap(phase); % era senza unwrap
-        % %
-        % %             X=[ sum(Amp.*xxx.^2) sum(Amp.*xxx.^1);
-        % %                 sum(Amp.*xxx.^1) sum(Amp.*xxx.^0)];
-        % %
-        % %             Y=[ sum(Amp.*faseApp.*xxx.^1) sum(Amp.*faseApp.*xxx.^0)]';
-        % %
-        % %             Coeff=pinv(X)*Y;
-        % %
-        % %             faseSim=Coeff(1).*xxx+Coeff(2); %considera solo la fase dello spettro
-        % %             %fine interpolazione mediante least mean squares
-        % %
-        % %         else %if realPart==0
-        % %                 faseSim=phase; %considera la fase dello spettro+rumore
-        % %         end
-
-        % %         SpettroC1(hh,:)=2*(yf_0).*exp(-1j*faseSim);
-
-        SpettroC1(hh,:)=2*(yf_0); %**Benedetto** 09/10/2020
-    end
-    %**Benedetto**
-
-    % %     VERSIONE VECCHIA
-    % %     switch trapz
-    % %
-    % %         case 0 % No apodization
-    % %
-    % %             I=round([1:length(C)]*(C.^2)'./sum(C.^2)); % Strategy to find the baricenter
-    % %             % s_0=C.*Apodization(1,length(C),I); % row
-    % %             s_0=C; % row
-    % %
-    % %             % fourier computed with the exponential matrix and no loop involved
-    % %             yf_0=(Dt.*s_0)*exps;
-    % %             phase=angle(yf_0); % This phase will be used to correct the spectral phase of the entire trace
-    % %
-    % %             Trap=ones(1,length(C));
-    % %
-    % %         case 2 % Trapezoidal
-    % %
-    % %             if auto_max==1
-    % %
-    % %                 I=round(Center);
-    % %                 [maxC,~] = max(C);
-    % %             else
-    % %
-    % %             [maxC,I] = max(C); % finds the position of the max
-    % %
-    % %             end;
-    % %
-    % %             I1=find(tt-tt(I)<=(tt(I)-tt(1))); % tt(I)-tt(1) is the distance between the first
-    % %             % point and the peak. It will be the distance
-    % %             % between the peak and the last point
-    % %
-    % %             tt1=tt(I1); % row
-    % %             y1=C(I1); % I select only the symmetric correlation
-    % %
-    % %             minC = min(C); % finds the min
-    % %
-    % %             maxC=maxC+Averages(y,x);
-    % %             minC=minC+Averages(y,x);
-    % %
-    % %             Contrast(hh)=(maxC-minC)/(maxC+minC);
-    % %             Ave(hh)=Averages(y,x);
-    % %             Correl(hh,:)=(1-2*pola)*C+Averages(y,x); % Keeps the correlation; (1-2*pola) is -1 or +1, depending whether the correlation has been reversed
-    % %
-    % %             Dt_1=diff(tt1);
-    % %             Dt_1(end+1)=Dt_1(end);
-    % %
-    % %             exps_1=exp(-1i*2*pi*tt1'*f);
-    % %
-    % %             s_1=y1.*Apodization(4,length(y1),I); % row
-    % %
-    % %             % fourier computed with the exponential matrix and no loop involved
-    % %             yf_1=(Dt_1.*s_1)*exps_1;
-    % %             phase=angle(yf_1); % This phase will be used to correct the spectral phase of the entire trace
-    % %
-    % %             % double Trapezoidal filter
-    % %             linear=1/(tt1(end)-tt1(1))*(tt1-tt1(1));
-    % %             Trap=ones(size(C));
-    % %             Trap(1:length(tt1))=linear;
-    % %
-    % %             Trap(end:-1:end-length(tt1)+1)=linear; % Trapezoidal apodization
-    % %
-    % %         case 1 % Triangular
-    % %             I=round([1:length(C)]*(C.^2)'./sum(C.^2)); % Strategy to find the baricenter
-    % %             % another strategy:  sum(tt.*C.^2)./sum(C.^2) to find the baricenter in tt
-    % %             % or [1:length(C)]*(C.^2)'./sum(C.^2) to find the pixel of the baricenter
-    % %
-    % %             s_0=C.*Apodization(4,length(C),I); % row
-    % %
-    % %             % fourier computed with the exponential matrix and no loop involved
-    % %             yf_0=(Dt.*s_0)*exps;
-    % %             phase=angle(yf_0); % This phase will be used to correct the spectral phase of the entire trace
-    % %
-    % %             Trap=Apodization(4,length(C),I);
-    % %
-    % %
-    % %         case 3 % Supergaussian
-    % %             I=round([1:length(C)]*(C.^2)'./sum(C.^2)); % Strategy to find the baricenter
-    % %             % another strategy:  sum(tt.*C.^2)./sum(C.^2) to find the baricenter in tt
-    % %             % or [1:length(C)]*(C.^2)'./sum(C.^2) to find the pixel of the baricenter
-    % %
-    % %             s_0=C.*Apodization(5,length(C),I,7); % row, Supergaussian
-    % %
-    % %             % fourier computed with the exponential matrix and no loop involved
-    % %             yf_0=(Dt.*s_0)*exps;
-    % %             phase=angle(yf_0); % This phase will be used to correct the spectral phase of the entire trace
-    % %
-    % %             Trap=Apodization(5,length(C),I,7);
-    % %
-    % %     end;
-
-    % % %     yf_ok=(Dt.*(C.*Trap))*exps;
-    % % %     SpettroC1(hh,:)=2*(yf_ok).*exp(-1j*phase);
-
-    % figure(30+hh);
-    figure(h0); axes(h0b);
-    plot(tt,C0+Averages(y,x),'m',tt,C,'r',tt,C.*Trap,'b',tt,Trap*max(C.*Trap),'k','linewidth',2); axis tight
-
-    figure(h0); axes(h0c);
-    plot(f,abs(SpettroC1(hh,:)),'b','linewidth',2); %real-->abs **Benedetto** 09/10/2020
-
-    pause; [x,y,button]=ginput(1);
-
-end;
-
-sp=hh;
-
-% end;
-
-for hh=1:sp
-    SpettroC2(hh,:)=SpettroC1(hh,:)./max(SpettroC1(hh,:)); % era abs(reference);
-end;
-
-% Frequency calibration
-h3=figure(3);
-
-subplot(2,1,1)
-plot(f,abs(SpettroC1),'linewidth',2); axis tight; %real-->abs **Benedetto** 09/10/2020
-title('Not normalized')
-legend;
-
-
-subplot(2,1,2)
-plot(f,abs(SpettroC2),'linewidth',2); axis tight; %real-->abs **Benedetto** 09/10/2020
-legend;
-
-h3a=gca;
-title('Normalized to white - Select Peaks for frequency calibration - RIGHT click when finished');
-
-figure(h3); axes(h3a);
-cal=0;
-[X,Y,BUTTON] = ginput(1);
-while BUTTON<=1
-    cal=cal+1;
-    answer=inputdlg('Corresponding wavelength (nm)','Wavewlength calibration',1,{'500'});
-    fr_realC(cal)=c./(str2double(answer)*1e-9)/1e12; % Frequency in THz
-    fr_pseudoC(cal)=X;
-
-    figure(h3); axes(h3a);
-    [X,Y,BUTTON] = ginput(1);
 end
-
-file_totCal=[];
-
-% To be moved
-switch cal
-
-    case {0,1}
-    case 2
-        M=(fr_realC(2)-fr_realC(1))/(fr_pseudoC(2)-fr_pseudoC(1));
-        Q=fr_realC(1)-M*fr_pseudoC(1);
-        fr_real=M*f+Q;
-
-        % Saving calibration
-        fprintf('\n  -- Saving calibration: calibration ranges --');
-
-        fr_real02=c/(abs(Dinput('\n\n    Shorter calibration wavelength (nm): ',300))*1e-9)/1e12; % highest frequency, in THz
-        fr_real01=c/(abs(Dinput('    Longer calibration wavelength (nm): ',1200))*1e-9)/1e12; % lowest frequency, in THz
-
-        f_01=(fr_real01-Q)/M;
-        f_02=(fr_real02-Q)/M;
-
-        f_0=linspace(f_01,f_02,500);
-        fr_real0=M*f0+Q;
-
-        figure(h3);
-
-        subplot(2,2,1);
-        plot(fr_real,abs(SpettroC1),'linewidth',2); axis tight %real-->abs **Benedetto** 09/10/2020
-        xlabel('Frequency (THz)')
-
-        % Correction frequency -> wavelength: SpettroC1*fr_real.^2/c
-        subplot(2,2,2);
-        plot(c./(fr_real*1e12)/1e-9,...
-            abs(SpettroC1.*fr_real(ones(1,size(SpettroC1,1)),:).^2/c),...
-            'linewidth',2); axis tight %real-->abs **Benedetto** 09/10/2020
-        % spectrumLabel(gca);
-        xlabel('Wavelength (nm)');
-
-        subplot(2,2,3);
-        plot(f,fr_real,f_0,fr_real0,fr_pseudoC,fr_realC,'*','linewidth',3);
-        xlabel('Pseudofrequency');
-        ylabel('Optical frequency [THz]');
-        legend('Interpolation1','Interpolation2','Measurement');
-
-        [filename_Cal, pathname_Cal] = uiputfile('*.mat', 'Save Calibration as',dir0);
-        file_tot=[pathname_Cal,filename_Cal];
-        save(file_tot,'f_0','fr_real0'); % f_0: pseudofrequency; f_real0: optical frequency (THz)
-
-        stringa=['  -- Calibration saved in ',file_tot,' --'];
-        fprintf('\n%s',stringa);
-
-    otherwise
-        % polynomial interpolation
-        [P,S,MU] = polyfit(fr_pseudoC,fr_realC,2);
-        fr_real = polyval(P,f,[],MU);
-
-        fprintf('\n  -- Saving calibration: calibration ranges --');
-
-        fr_real02=c/(abs(Dinput('\n\n    Shorter calibration wavelength (nm): ',300))*1e-9)/1e12; % highest frequency, in THz
-        fr_real01=c/(abs(Dinput('    Longer calibration wavelength (nm): ',1200))*1e-9)/1e12; % lowest frequency, in THz
-
-        fr_real0=linspace(fr_real01,fr_real02,500);
-
-        [P1,S1,MU] = polyfit(fr_realC,fr_pseudoC,2);
-        f_0 = polyval(P1,fr_real0,[],MU);
-
-        figure(h3);
-
-        subplot(2,2,1);
-        plot(fr_real,abs(SpettroC1),'linewidth',2); axis tight %real-->abs **Benedetto** 09/10/2020
-        xlabel('Frequency [THz]')
-
-        % Correction frequency -> wavelength: SpettroC1*fr_real.^2/c
-        subplot(2,2,2);
-        plot(c./(fr_real*1e12)/1e-9,...
-            abs(SpettroC1.*fr_real(ones(1,size(SpettroC1,1)),:).^2/c),...
-            'linewidth',2); axis tight %real-->abs **Benedetto** 09/10/2020
-        xlabel('Wavelength [nm]')
-        % spectrumLabel(gca)
-
-        subplot(2,2,3);
-        plot(f,fr_real,f_0,fr_real0,fr_pseudoC,fr_realC,'*','linewidth',3);
-        xlabel('Pseudofrequency');
-        ylabel('Optical frequency [THz]');
-        legend('Interpolation1','Interpolation2','Measurement');
-
-        % Saving calibration
-        [filename_Cal, pathname_Cal] = uiputfile('*.mat', 'Save Calibration as',dir0);
-        file_totCal=[pathname_Cal,filename_Cal];
-        save(file_totCal,'f_0','fr_real0'); % f_0: pseudofrequency; f_real0: optical frequency (THz)
-
-        stringa=['  -- Calibration saved in ',file_tot,' --'];
-        fprintf('\n%s',stringa);
-end;
-
-if cal<2
-
-    load_cal=round(Dinput('\n\n    Load calibration [0: no - 1: yes]? ',0));
-
-    if load_cal
-
-        [filename_Cal, pathname_Cal] = uigetfile('*.mat', 'Load Calibration',dir0);
-        file_totCal=[pathname_Cal,filename_Cal];
-
-        stringa=[' *** Loaded calibration ',file_totCal,' ***'];
-        fprintf('\n\n%s',stringa);
-
-        load(file_totCal); % Contains  fr_real0 and f_0
-        cal=2; % For next steps, this means that calibration is available
-
-        fr_real=interp1(f_0,fr_real0,f);
-
-        figure(h3);
-
-        subplot(2,1,1);
-        plot(fr_real,abs(SpettroC1),'linewidth',2); axis tight %real-->abs **Benedetto** 09/10/2020
-        xlabel('Frequency (THz)')
-
-        % Correction frequency -> wavelength: SpettroC1*fr_real.^2/c
-        subplot(2,1,2);
-        plot(c./(fr_real*1e12)/1e-9,...
-            abs(SpettroC1.*fr_real(ones(1,size(SpettroC1,1)),:).^2/c),...
-            'linewidth',2); axis tight %real-->abs **Benedetto** 09/10/2020
-        xlabel('Wavelength (nm)')
-        % spectrumLabel(gca)
-
-    end;
-
-end;
-
-Dt=diff(tt);
-Dt(end+1)=Dt(end);
-
-% hhh=figure;
-map1=colormap(jet(512));
-% xx=linspace(0,255,256); %**Benedetto**
-% yy=linspace(0,63,512);
-% map1=interp1(xx,map,yy);
-%
-% zz=log(yy/63)-log(yy(2)/63); zz=zz/max(zz)*63; zz(1)=0;
-% maplog=interp1(xx,map,zz);
-% close(hhh);
 
 fprintf('\n  -- Image processing --');
 
@@ -1526,7 +1410,6 @@ end;
 
 Sp_filt=Dinput('\n\n    Generation of spectral Hypercube? (1 = yes, 0 = no): ',0);
 num_fig=0;
-f00=f;
 
 if Sp_filt
 
@@ -1536,12 +1419,12 @@ if Sp_filt
     % filt=Dinput('    Smoothing level (0 = no smoothing): ',0);
 
     fprintf('\n    Interferogram background subtraction:');
-    linearFit=Dinput('\n          0 = constant line (faster) - 1 = linear trend (slower)- 2 =quadratic trend ? ',linearFit);
-    trapz=round(Dinput('\n    Apodization (0: none - 1: Happ-Genzel - 2: 3-term Blackman-Harris - 3: 4-term Blackman-Harris - 4: Triangular - 5: Supergaussian - 6: Trapezoidal)? ',trapz)); %**Benedetto**
-    center_find=round(Dinput('\n    Interferograms center calculation (0: exactly in the middle   - 1: function baricenter)? ',center_find)); %**Benedetto** 14/01/2021
+    linearFit=Dinput('\n          0 = constant line (faster) - 1 = linear trend (slower)- 2 =quadratic trend ? ',0);
+    trapz=round(Dinput('\n    Apodization (0: none - 1: Happ-Genzel - 2: 3-term Blackman-Harris - 3: 4-term Blackman-Harris - 4: Triangular - 5: Supergaussian - 6: Trapezoidal)? ',1));
+    center_find=round(Dinput('\n    Interferograms center calculation (0: exactly in the middle   - 1: function baricenter)? ',1));
 
-    %%%**Benedetto** ha messo come commento le seguenti righe il 09/10/2020
-    % %     realPart=Dinput('\n    SPECTRUM: [0: absolute value (asymmetric interf., e.g. Raman) - 1: real part (symmetric interf.)]? ',realPart); %**Benedetto** 26/09/2020
+    %%% **Martina** changed these dinput functions default values. They are the same as the initial ones, no matter of the eventual chosen
+    %%% values in the preview (7.04.2025)
 
     if trapz==6 %**Benedetto**
 
@@ -1573,6 +1456,24 @@ if Sp_filt
     %     end;
 
     HyperMatrixFilt1=zeros(size(A));
+
+    %%% **Martina**
+    if ~preview %calibration must be loaded now
+
+        [filename_Cal, pathname_Cal] = uigetfile('*.mat', 'Load Calibration',dir0);
+        file_totCal=[pathname_Cal,filename_Cal];
+
+        stringa=[' *** Loaded calibration ',file_totCal,' ***'];
+        fprintf('\n\n%s',stringa);
+
+        load(file_totCal); % Contains  fr_real0 and f_0
+        cal=2; % For next steps, this means that calibration is available
+
+        Dt=diff(tt);
+        Dt(end+1)=Dt(end);
+    end
+
+
 
     if cal>1
 
@@ -1701,30 +1602,6 @@ if Sp_filt
                 % fourier computed with the exponential matrix and no loop involved
                 yf_1=(Dt_1.*s_1)*exps_1;
 
-                %%%**Benedetto** ha messo come commento le seguenti righe il 09/10/2020
-                % %                     phase_1=angle(yf_1); % This phase will be used to correct the spectral phase of the entire trace
-                % %                     %**Benedetto** 24/09/2020 modifica phase_l --> phase_1
-                % %
-                % %                     if realPart %**Benedetto** 26/09/2020
-                % %                         %Interpolazione mediante least mean squares
-                % %                         xxx=f;
-                % %                         Amp=abs(yf_1).^2;
-                % %                         faseApp_1=phase_1;
-                % %
-                % %                         X=[ sum(Amp.*xxx.^2) sum(Amp.*xxx.^1);
-                % %                             sum(Amp.*xxx.^1) sum(Amp.*xxx.^0)];
-                % %
-                % %                         Y=[ sum(Amp.*faseApp_1.*xxx.^1) sum(Amp.*faseApp_1.*xxx.^0)]';
-                % %
-                % %                         Coeff=pinv(X)*Y;
-                % %
-                % %                         faseSim_1=Coeff(1).*xxx+Coeff(2); %considera solo la fase dello spettro
-                % %                         %fine interpolazione mediante least mean squares
-                % %
-                % %                     else
-                % %                         faseSim_1=phase_1; %considera la fase di spettro+rumore
-                % %                     end
-
                 % double Trapezoidal filter
                 linear=1/(tt1(end)-tt1(1))*(tt1-tt1(1));
                 Trap_l=ones(size(C));
@@ -1768,30 +1645,6 @@ if Sp_filt
                 % fourier computed with the exponential matrix and no loop involved
                 yf_0=(Dt.*s_0)*exps;
 
-                %%%**Benedetto** ha messo come commento le seguenti righe il 09/10/2020
-                % %                 phase_1=unwrap(angle(yf_0)); % This phase will be used to correct the spectral phase of the entire trace
-                % %
-                % %                 if realPart %*Benedetto** 26/09/2020
-                % %                     %Interpolazione mediante least mean squares
-                % %                     xxx=f;
-                % %                     Amp=abs(yf_0).^2;
-                % %                     faseApp_1=phase_1;
-                % %
-                % %                     X=[ sum(Amp.*xxx.^2) sum(Amp.*xxx.^1);
-                % %                         sum(Amp.*xxx.^1) sum(Amp.*xxx.^0)];
-                % %
-                % %                     Y=[ sum(Amp.*faseApp_1.*xxx.^1) sum(Amp.*faseApp_1.*xxx.^0)]';
-                % %
-                % %                     Coeff=pinv(X)*Y;
-                % %
-                % %                     faseSim_1=Coeff(1).*xxx+Coeff(2);
-                % %                     %fine interpolazione mediante least mean squares
-                % %
-                % %                 else
-                % %                     faseSim_1=phase_1; %considera la fase di spettro+rumore
-                % %                 end
-
-                %%%%%%%%%%%%%%%% Era in fondo
                 Spectrum=2*yf_0;
                 %%%**Benedetto** ha messo come commento le seguenti righe il 09/10/2020
                 % %                 Spectrum=2*real((yf_0).*exp(-1j*faseSim_1));
@@ -1803,142 +1656,7 @@ if Sp_filt
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Fine era in fondo
 
             end
-            %**Benedetto**
 
-            % %             VERSIONE VECCHIA
-            % %             switch trapz
-            % %
-            % %                 case 0 % No apodization
-            % %
-            % %                     I=round([1:length(C)]*(C.^2)'./sum(C.^2)); % Strategy to find the baricenter
-            % %                     s_0=C; % row
-            % %
-            % %                     % fourier computed with the exponential matrix and no loop involved
-            % %                     yf_0=(Dt.*s_0)*exps;
-            % %                     phase_l=angle(yf_0); % This phase will be used to correct the spectral phase of the entire trace
-            % %
-            % %                     Trap_l=ones(1,length(C));
-            % %
-            % %                     % Era in fondo
-            % %                     yf_ok=yf_0;
-            % %                     Spectrum=2*real((yf_ok).*exp(-1j*phase_l));
-            % %                     Hyperspectrum_cube(y,x,:)=Spectrum;
-            % %
-            % %                     HyperMatrixFilt1(y,x)=sum(Spectrum).*Df; % Integral of filtered spectrum
-            % %                     Normalization=Averages(y,x)./HyperMatrixFilt1(y,x);
-            % %
-            % %                     % fine era in fondo
-            % %
-            % %                 case 2 % Trapezoidal
-            % %
-            % %                     if auto_max==1
-            % %
-            % %                         [maxC,~] = max(C);
-            % %
-            % %                         %I, I1, tt1: calculated before
-            % %                     else
-            % %
-            % %                         %I, I1, tt1: calculated for any time
-            % %                         [maxC,I] = max(C); % finds the position of the max
-            % %
-            % %                         I1=find(tt-tt(I)<=(tt(I)-tt(1))); % tt(I)-tt(1) is the distance between the first
-            % %                         % point and the peak. It will be the distance
-            % %                         % between the peak and the last point
-            % %                         if length(I1)<3, I1=[1 2 3]; end;
-            % %
-            % %                         tt1=tt(I1); % row
-            % %
-            % %                     end;
-            % %                     y1=C(I1); % I select only the symmetric correlation
-            % %
-            % %                     minC = min(C); % finds the min
-            % %
-            % %                     maxC=maxC+Averages(y,x);
-            % %                     minC=minC+Averages(y,x);
-            % %
-            % %                     Dt_1=diff(tt1);
-            % %                     Dt_1(end+1)=Dt_1(end);
-            % %
-            % %                     exps_1=exp(-1i*2*pi*tt1'*f);
-            % %
-            % %                     s_1=y1.*Apodization(4,length(y1),I); % row
-            % %
-            % %                     % fourier computed with the exponential matrix and no loop involved
-            % %                     yf_1=(Dt_1.*s_1)*exps_1;
-            % %                     phase_l=angle(yf_1); % This phase will be used to correct the spectral phase of the entire trace
-            % %
-            % %                     % double Trapezoidal filter
-            % %                     linear=1/(tt1(end)-tt1(1))*(tt1-tt1(1));
-            % %                     Trap_l=ones(size(C));
-            % %                     Trap_l(1:length(tt1))=linear;
-            % %
-            % %                     Trap_l(end:-1:end-length(tt1)+1)=linear; % Trapezoidal apodization
-            % %
-            % %
-            % %                     %%%%%%%%%%%%%%%% Era in fondo
-            % %                     yf_ok=(Dt.*(C.*Trap_l))*exps;
-            % %                     Spectrum=2*real((yf_ok).*exp(-1j*phase_l));
-            % %
-            % %                     Hyperspectrum_cube(y,x,:)=Spectrum;
-            % %                     % Hyperspectrum_matrix(l_matrix,:)=Spectrum;
-            % %
-            % %                     HyperMatrixFilt1(y,x)=sum(Spectrum).*Df; % Integral of filtered spectrum
-            % %                     Normalization=Averages(y,x)./HyperMatrixFilt1(y,x);
-            % %                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Fine era in fondo
-            % %
-            % %                 case 1 % Triangular
-            % %                     I=round([1:length(C)]*(C.^2)'./sum(C.^2)); % Strategy to find the baricenter
-            % %                     % another strategy:  sum(tt.*C.^2)./sum(C.^2) to find the baricenter in tt
-            % %                     % or [1:length(C)]*(C.^2)'./sum(C.^2) to find the pixel of the baricenter
-            % %
-            % %                     s_0=C.*Apodization(4,length(C),I); % row
-            % %
-            % %                     % fourier computed with the exponential matrix and no loop involved
-            % %                     yf_0=(Dt.*s_0)*exps;
-            % %                     phase_l=angle(yf_0); % This phase will be used to correct the spectral phase of the entire trace
-            % %
-            % %                     % Trap_l=Apodization(4,length(C),I);
-            % %
-            % %                     %%%%%%%%%%%%%%%% Era in fondo
-            % %                     yf_ok=yf_0;
-            % %                     Spectrum=2*real((yf_ok).*exp(-1j*phase_l));
-            % %                     Hyperspectrum_cube(y,x,:)=Spectrum;
-            % %
-            % %                     HyperMatrixFilt1(y,x)=sum(Spectrum).*Df; % Integral of filtered spectrum
-            % %                     Normalization=Averages(y,x)./HyperMatrixFilt1(y,x);
-            % %                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Fine era in fondo
-            % %
-            % %                 case 3 % Supergaussian
-            % %                     I=round([1:length(C)]*(C.^2)'./sum(C.^2)); % Strategy to find the baricenter
-            % %
-            % %                     s_0=C.*Apodization(5,length(C),I,7); % row, Supergaussian
-            % %
-            % %                     % fourier computed with the exponential matrix and no loop involved
-            % %                     yf_0=(Dt.*s_0)*exps;
-            % %                     phase_l=angle(yf_0); % This phase will be used to correct the spectral phase of the entire trace
-            % %
-            % %                     Trap_l=Apodization(5,length(C),I,7);
-            % %
-            % %                     %%%%%%%%%%%%%%%% Era in fondo
-            % %                     yf_ok=yf_0;
-            % %                     Spectrum=2*real((yf_ok).*exp(-1j*phase_l));
-            % %                     Hyperspectrum_cube(y,x,:)=Spectrum;
-            % %
-            % %                     HyperMatrixFilt1(y,x)=sum(Spectrum).*Df; % Integral of filtered spectrum
-            % %                     Normalization=Averages(y,x)./HyperMatrixFilt1(y,x);
-            % %                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Fine era in fondo
-            % %
-            % %             end;
-
-            % This part has now moved inside each of the previous cases
-            %             yf_ok=(Dt.*(C.*Trap_l))*exps;
-            %             Spectrum=2*real((yf_ok).*exp(-1j*phase_l));
-            %
-            %             Hyperspectrum_cube(y,x,:)=Spectrum;
-            %             % Hyperspectrum_matrix(l_matrix,:)=Spectrum;
-            %
-            %             HyperMatrixFilt1(y,x)=sum(Spectrum).*Df; % Integral of filtered spectrum
-            %             Normalization=Averages(y,x)./HyperMatrixFilt1(y,x);
 
         end;
 
@@ -1959,104 +1677,6 @@ if Sp_filt
         save_hypercube(file_tot,Hyperspectrum_cube,f,saturationMap,[],[],[],dir0,file_tot);
     end
 
-    % %     h=waitbar(0.5,'Saving Hypercube');
-    % %
-    % %     file_spectra=[file_tot(1:end-4),'_SpectralHypercube.mat'];
-    % %
-    % %     stringa=[' *** Hypercube saved in ',file_spectra,' ***'];
-    % %     fprintf('\n\n%s \n\n',stringa);
-    % %
-    % %     if exist('fr_real')
-    % %
-    % %         % Checks the size of the matrix, before saving
-    % %         HyProp = whos('Hyperspectrum_cube') ;
-    % %         Gigabytes = HyProp.bytes/2^30;
-    % %
-    % %         if Gigabytes<1.8
-    % %             save(file_spectra,'f','fr_real','Hyperspectrum_cube','saturationMap','file_totCal'); %**Benedetto** saturationMap 25/10/2020
-    % %         else
-    % %             save(file_spectra,'f','fr_real','Hyperspectrum_cube','saturationMap','file_totCal','-v7.3'); %**Benedetto** saturationMap 25/10/2020
-    % %         end;
-    % %
-    % %         % save(file_spectra,'f','fr_real','Hyperspectrum_cube','saturationMap','file_totCal','-v7.3'); %**Benedetto** saturationMap 25/10/2020
-    % %     else
-    % %
-    % %         % Checks the size of the matrix, before saving
-    % %         HyProp = whos('Hyperspectrum_cube') ;
-    % %         Gigabytes = HyProp.bytes/2^30;
-    % %
-    % %         if Gigabytes<1.8
-    % %             save(file_spectra,'tt','f','Hyperspectrum_cube','saturationMap'); %**Benedetto** saturationMap 25/10/2020
-    % %         else
-    % %             save(file_spectra,'tt','f','Hyperspectrum_cube','saturationMap','-v7.3'); %**Benedetto** saturationMap 25/10/2020
-    % %         end;
-    % %
-    % %         % save(file_spectra,'f','Hyperspectrum_cube','saturationMap','-v7.3'); %**Benedetto** saturationMap 25/10/2020
-    % %
-    % %     close(h);
 end
 
 return;   %%% END OF PROGRAM
-
-
-% %     if cal>1 % Only if calibration has been performed
-% %         % ImmagineRGB = applycform(Immagine_xyz, cform);
-% %         if filt>0
-% %             ImmagineRGB(:,:,1) = imfilter(ImmagineRGB(:,:,1),H,'replicate');
-% %             ImmagineRGB(:,:,2) = imfilter(ImmagineRGB(:,:,2),H,'replicate');
-% %             ImmagineRGB(:,:,3) = imfilter(ImmagineRGB(:,:,3),H,'replicate');
-% %         end;
-% %
-% %         ImmagineRGB=ImmagineRGB./max(max(max(ImmagineRGB)));
-% %
-% %         figure(num_fig+5);
-% %         image(uint8(ImmagineRGB*256)); axis equal; axis off
-% %         title('Immagine "RGB"')
-% %         file_imageRGB=[file_tot(1:end-4),'_RGB_',num2str(num_fig+5)];
-% %         print(file_imageRGB,'-djpeg','-r300');
-% %
-% %     end;
-% %
-% %     if filt>0
-% %         figure(10*num_fig+1);
-% %         % HyperMatrixFilt_norm1=HyperMatrixFilt1/max(max(HyperMatrixFilt1))*256;
-% %
-% %         % No normalization
-% %         HyperMatrixFilt_norm1=HyperMatrixFilt1;
-% %         HyperMatrixFilt_norm1 = imfilter(HyperMatrixFilt_norm1,H,'replicate'); % Gaussian filter for smoothing
-% %         % Linear scale
-% %
-% %         pcolor(HyperMatrixFilt_norm1); colormap(map1); shading flat% Era imagesc
-% %         title('Filtered and smoothed image - linear colormap')
-% %         axis equal; axis off;
-% %
-% %         figure(10*num_fig+2);
-% %         % Log scale
-% %
-% %         % pcolor(log((HyperMatrixFilt_Norm1-min(min(HyperMatrixFilt_Norm1))))); colormap(map1); shading flat% Era imagesc
-% %         pcolor(HyperMatrixFilt_norm1); colormap(maplog); shading flat% Era imagesc
-% %         title('Filtered and smoothed image - log colormap')
-% %         axis equal; axis off;
-% %
-% %     end;
-% %
-% %     % Linear scale
-% %     figure(10*num_fig+3)
-% %     pcolor(HyperMatrixFilt1); colormap(map1); shading flat; % era imagesc
-% %     title('Filtered image - Linear colormap')
-% %     axis equal; axis off;
-% %     colorbar;
-% %     file_image=[file_tot(1:end-4),'_',num2str(10*num_fig+3)];
-% %     print(file_image,'-djpeg','-r300');
-% %
-% %     % Log scale
-% %     figure(10*num_fig+4)
-% %     pcolor(HyperMatrixFilt1); colormap(maplog); shading flat; % era imagesc
-% %     title('Filtered image - log colormap')
-% %     axis equal; axis off;
-% %     colorbar;
-% %
-% %     % Sp_filt=Dinput('\n\n    Image spectral filtering? (1 = yes, 0 = no): ',0);
-% %     f=f00;
-% %
-% % end;
