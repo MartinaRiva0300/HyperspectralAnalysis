@@ -9,7 +9,7 @@ function y=Apodization(window,size,center,index)
 %          3  4-term Blackman-Harris
 %          4  Triangular
 %          5  Supergaussian, with index
-%          6  Trapezoidal (NOT READY YET)
+%          6  Trapezoidal (implemented directly in the HyperspectralAnalysis_Time code)
 %  size  : number of samples
 %  center: position of center of trace (number of vector element)
 %  index : for supergaussian apodization
