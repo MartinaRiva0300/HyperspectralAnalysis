@@ -55,12 +55,17 @@ load_matrix=round(Dinput('\n\n    Load pre-processed hypercube [0: no - 1: yes]?
 
 if load_matrix
 
-    [filename_Hyper, pathname_Hyper] = uigetfile('*.mat', 'Load Hypercube',dir0);
+    [filename_Hyper, pathname_Hyper] = uigetfile('*.mat;*.h5;', 'Load Hypercube',dir0);
     file_tot=[pathname_Hyper,filename_Hyper];
     dir2=pathname_Hyper;
 
     stringa=[' *** Analysis of file ',file_tot,' ***'];
     fprintf('\n\n%s',stringa);
+
+    if strcmp(filename_Hyper(end-2:end),'.h5') %for .h5 file
+      H5toMatlabHypercube(filename_Hyper, pathname_Hyper); %creates a .mat in the same folder 
+      file_tot=[pathname_Hyper, strcat(filename_Hyper(1:end-3), '_hyp.mat')]; %file to be loaded
+    end
 
     load(file_tot);
 
