@@ -3,7 +3,7 @@
 %the same folder of the .h5 file. The .mat temporal hypercube is a struct
 %file with HyperMatrix (the temporal hypercube) and t (the delay axis)
 
-dir0=('C:\Users\HARDi\OneDrive\Desktop\Tesi');
+%dir0=('C:\Users\HARDi\OneDrive\Desktop\Tesi');
 
 [filename_Hyper, pathname_Hyper] = uigetfile('*.h5', 'Load Hypercube',dir0);
 
